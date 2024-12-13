@@ -41,6 +41,15 @@ def remove_language_head(state_dict):
             del state_dict[key]
     return state_dict
 
+def load_r3m_local(modelpath, configpath):
+    modelcfg = omegaconf.OmegaConf.load(configpath)
+    cleancfg = cleanup_config(modelcfg)
+    rep = hydra.utils.instantiate(cleancfg)
+    rep = torch.nn.DataParallel(rep)
+    r3m_state_dict = remove_language_head(torch.load(modelpath, map_location=torch.device(device))['r3m'])
+    rep.load_state_dict(r3m_state_dict)
+    return rep
+    
 def load_r3m(modelid):
     home = os.path.join(expanduser("~"), ".r3m")
     if modelid == "resnet50":
